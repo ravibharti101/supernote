@@ -90,9 +90,13 @@ case $cmd in
     if ! size=$(timeout -k 2 20 "$mmdr" -i "$src" --size 2> "$work/err"); then
       die "mermaid could not draw this diagram: $(head -n1 "$work/err" | sed 's/^error: *//')"
     fi
-    dims=$(jq -r '"\((.width * 2 | ceil)) \((.height * 2 | ceil))"' <<< "$size" 2>/dev/null) || die "mmdr gave no size"
-    read -r w2 h2 <<< "$dims"
+    dims=$(jq -r '"\(.width) \(.height) \((.width * 2 | ceil)) \((.height * 2 | ceil))"' <<< "$size" 2>/dev/null) || die "mmdr gave no size"
+    read -r w0 h0 w2 h2 <<< "$dims"
     [[ $w2 =~ ^[0-9]+$ && $h2 =~ ^[0-9]+$ && $w2 -gt 0 && $h2 -gt 0 ]] || die "mmdr gave a bad size"
+    # mmdr accepts a header it recognizes but a body it does not parse into anything (garbled flowchart edges,
+    # stray text in a class/state diagram, ...) by silently "succeeding" with a tiny 16x16 fallback glyph instead
+    # of failing. The smallest real diagram is far bigger (~80x90), so treat this size as a failed render.
+    awk -v w="$w0" -v h="$h0" 'BEGIN { exit !(w <= 20 && h <= 20) }' && die "mermaid could not draw this diagram: unrecognized or empty diagram"
     if (( w2 > MAX_PX_W || h2 > MAX_PX_H )); then die "the picture would be too large"; fi
     timeout -k 2 20 "$mmdr" -i "$src" -o "$work/out.png" -e png -t "$theme" -c "$work/cfg.json" -w "$w2" -H "$h2" 2> "$work/err" \
       || die "mermaid could not draw this diagram: $(head -n1 "$work/err" | sed 's/^error: *//')"

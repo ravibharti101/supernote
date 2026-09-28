@@ -37,9 +37,13 @@ flowchart LR
   cannot write into hidden folders such as `~/.cache`.
 - **Mermaid** uses [`mmdr`](https://github.com/1jehuang/mermaid-rs-renderer) (pure Rust, no browser). Lookup order:
   `$SN_MMDR`, `mmdr` on `PATH`, the cached pinned release (v0.3.1, SHA-256 verified, downloaded once). The diagram is
-  first measured (`mmdr --size`, which also rejects invalid syntax), then rendered at twice that size with the built-in
-  `dark` or `default` theme and a transparent background. `mmdr` supports 23 diagram types; it is young, so styling
-  can differ from mermaid.js and some diagrams may fail. Those stay code blocks and produce one toast per session.
+  first measured (`mmdr --size`, which also rejects most invalid syntax), then rendered at twice that size with the
+  built-in `dark` or `default` theme and a transparent background. `mmdr` supports 23 diagram types; it is young, so
+  styling can differ from mermaid.js and some diagrams may fail. Those stay code blocks and produce one toast per
+  session. A diagram with a header `mmdr` recognizes but a body it cannot parse into anything (garbled edges, stray
+  text in a class/state diagram) is not always rejected by `--size` - `mmdr` silently "succeeds" with a tiny 16x16
+  fallback glyph instead. The smallest real diagram is far bigger (~80x90), so that size is treated as a failed
+  render too, rather than shown as a nearly-invisible picture.
 - **Sizes**: math is set slightly larger than the 16 px preview text (Typst's math font looks smaller) and uses the actual
   bounds of the formula, so stacked fractions and limits are not cropped. Bump `VERSION` in `js/render.js` when the look
   changes, so cached pictures are regenerated.

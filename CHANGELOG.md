@@ -19,6 +19,9 @@
 - `Alt++` / `Alt+-` were being typed into the note instead of resizing the panel: Qt's editor only blocks its own
   default key handling for Ctrl, not for a lone Alt, so the panel-level shortcut never saw the event while the
   editor had focus. Claimed in the editor's own key handler instead, alongside Ctrl+V and Ctrl+Enter-follow-link.
+- A Mermaid diagram `mmdr` recognized the header of but couldn't parse the body of (garbled edges, stray text in a
+  class/state diagram) rendered as a nearly-invisible 16x16 picture instead of falling back to a code block:
+  `mmdr --size` doesn't reject it, it silently returns that fallback size. Now treated as a failed render.
 
 ## 0.6.0
 

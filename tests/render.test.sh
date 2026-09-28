@@ -38,7 +38,9 @@ if dims=$("$R" mermaid "$T/g.mmd" "$T/d.png" '#e6e6e6' 1 2>/dev/null); then
   fails "$R" mermaid "$T/bad.mmd" "$T/bad2.png" '#e6e6e6' 1
   printf 'not a diagram' > "$T/bad3.mmd"
   fails "$R" mermaid "$T/bad3.mmd" "$T/bad3.png" '#e6e6e6' 1
-  check "mermaid: a syntax error leaves no file behind" "0" "$(ls "$T" | grep -c '^bad[23].png$')"
+  printf 'classDiagram\n  Foo <|-- \n  garbled nonsense that is not a relation\n' > "$T/bad4.mmd"
+  fails "$R" mermaid "$T/bad4.mmd" "$T/bad4.png" '#e6e6e6' 1
+  check "mermaid: a syntax error leaves no file behind" "0" "$(ls "$T" | grep -c '^bad[234].png$')"
   printf 'graph TD\n  A["<b>x & y</b>"] --> B' > "$T/esc.mmd"
   check "mermaid: html-special characters in labels are handled" "1" "$("$R" mermaid "$T/esc.mmd" "$T/e.png" '#e6e6e6' 0 >/dev/null 2>&1 && echo 1 || echo 0)"
   check "mermaid: no temp files left in the cache" "0" "$(ls "$SN_CACHE" | grep -c '^tmp-')"

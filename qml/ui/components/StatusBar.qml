@@ -13,6 +13,9 @@ Rectangle {
     anchors.bottom: parent.bottom
     height: 30
     color: Theme.surfaceContainer
+    // Follows the panel's own bottom corners (square in window mode, same as panelBackground's own radius logic).
+    bottomLeftRadius: ui.core.windowMode === "window" ? 0 : Theme.cornerRadius
+    bottomRightRadius: ui.core.windowMode === "window" ? 0 : Theme.cornerRadius
     StyledText {
         anchors.left: parent.left
         anchors.leftMargin: 16

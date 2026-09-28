@@ -122,52 +122,61 @@ SyncLayer {
                     }
                 }
 
-                Header {
-                    id: header
-                    ui: ui
-                }
+                // Inset by the border width so nothing painted in here (tab bar, status bar, right-panel divider,
+                // ...) draws over the 1px border stroke or clips past the panel's own rounded corners. The
+                // overlays below (autocomplete, cheat sheet, switcher, menus, dialogs) stay direct children of
+                // panelBackground instead - they're modal and are fine covering the whole panel, border included.
+                Item {
+                    id: content
+                    anchors.fill: parent
+                    anchors.margins: panelBackground.border.width
 
-                Rectangle {
-                    id: headerLine
-                    anchors.top: header.bottom
-                    anchors.left: parent.left
-                    anchors.right: parent.right
-                    height: 1
-                    color: Theme.outline
-                    opacity: 0.4
-                }
+                    Header {
+                        id: header
+                        ui: ui
+                    }
 
-                Sidebar {
-                    id: sidebar
-                    ui: ui
-                    anchors.top: headerLine.bottom
-                    anchors.left: parent.left
-                }
+                    Rectangle {
+                        id: headerLine
+                        anchors.top: header.bottom
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        height: 1
+                        color: Theme.outline
+                        opacity: 0.4
+                    }
 
-                Rectangle {
-                    id: sidebarLine
-                    anchors.top: headerLine.bottom
-                    anchors.left: sidebar.right
-                    anchors.bottom: parent.bottom
-                    width: ui.core.showSidebar ? 1 : 0
-                    color: Theme.outline
-                    opacity: 0.4
-                }
+                    Sidebar {
+                        id: sidebar
+                        ui: ui
+                        anchors.top: headerLine.bottom
+                        anchors.left: parent.left
+                    }
 
+                    Rectangle {
+                        id: sidebarLine
+                        anchors.top: headerLine.bottom
+                        anchors.left: sidebar.right
+                        anchors.bottom: parent.bottom
+                        width: ui.core.showSidebar ? 1 : 0
+                        color: Theme.outline
+                        opacity: 0.4
+                    }
 
-                EditorArea {
-                    id: editorArea
-                    ui: ui
-                    anchors.top: headerLine.bottom
-                    anchors.left: sidebarLine.right
-                    anchors.right: rightPanelItem.left
-                    anchors.bottom: parent.bottom
-                }
+                    EditorArea {
+                        id: editorArea
+                        ui: ui
+                        anchors.top: headerLine.bottom
+                        anchors.left: sidebarLine.right
+                        anchors.right: rightPanelItem.left
+                        anchors.bottom: parent.bottom
+                    }
 
-                RightPanel {
-                    id: rightPanelItem
-                    ui: ui
-                    anchors.top: headerLine.bottom
+                    RightPanel {
+                        id: rightPanelItem
+                        ui: ui
+                        anchors.top: headerLine.bottom
+                    }
                 }
 
                 AutocompletePopup {

@@ -92,7 +92,9 @@ check "the left panel starts hidden" 0 "$(field .panel.sidebarWidth)"
 
 ipc openNote A >/dev/null
 wait_for "openNote A opens A.md" '.note == "A.md" and .bufferLength > 100 and (.dirty | not)' 8
-wait_for "the editor fills the docked width" ".panel.editorWidth == $W0 and .panel.editorVisible and (.panel.previewVisible | not)" 5
+# editorArea is inset by panelBackground's 1px border on each side (qml/ui/SuperNotePanel.qml's `content` wrapper),
+# so it's 2px narrower than the panel's own outer width even with the sidebar and right panel both closed.
+wait_for "the editor fills the docked width" ".panel.editorWidth == $((W0 - 2)) and .panel.editorVisible and (.panel.previewVisible | not)" 5
 
 # ---- view modes --------------------------------------------------------------------------------------------------------
 ipc viewMode split >/dev/null

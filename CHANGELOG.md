@@ -29,6 +29,17 @@
 - A Mermaid diagram `mmdr` recognized the header of but couldn't parse the body of (garbled edges, stray text in a
   class/state diagram) rendered as a nearly-invisible 16x16 picture instead of falling back to a code block:
   `mmdr --size` doesn't reject it, it silently returns that fallback size. Now treated as a failed render.
+- The tab bar and status bar painted over the panel's own 1px border on the left and right (and, for the status
+  bar, the bottom too), and the status bar's bottom corners were square instead of following the panel's rounded
+  ones. The panel's real content is now inset by the border's width, and the status bar's bottom corners match
+  `Theme.cornerRadius` (square in the expanded window, same as the panel itself).
+
+### Changed
+- **Tab bar redesign**: tabs are flat (no more per-tab box/border) with a thin colored underline marking the
+  active one and a thin separator below the whole row, instead of a filled, bordered active tab against a
+  contrasting bar background. A long tab title now elides to one line instead of wrapping and spilling out of
+  the tab (it always meant to; the default text style's wrap-then-elide only elides once something bounds its
+  height, and nothing did).
 
 ## 0.6.0
 

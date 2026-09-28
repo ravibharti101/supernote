@@ -2,6 +2,7 @@ import QtQuick
 import qs.Common
 import qs.Widgets
 import qs.Modules.Plugins
+import "qml/ui/settings"
 
 // Settings shown in DMS Settings > Plugins. Empty values fall back to the vault's .obsidian config
 // (daily-notes / templates / app), then to SuperNote's own defaults. Vaults are managed in the panel.
@@ -102,6 +103,12 @@ PluginSettings {
             label: "Editor font size"
             description: "Pixels. Default: 15"
             placeholder: "15"
+        }
+
+        ShortcutList {
+            settingKey: "keymap"
+            label: "Keyboard shortcuts"
+            description: "Click a shortcut to change it, then press the new key combination (Esc cancels). The refresh icon resets one row to its default; \"Reset all\" clears every override. Structural keys (Escape, arrows, Tab, Enter to confirm) aren't listed - they always work the same way."
         }
     }
 }

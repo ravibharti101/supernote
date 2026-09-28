@@ -33,7 +33,10 @@ to call right after start-up. The panel opens on the focused screen.
 `switcher`, `rename`, `pin`, `delete`, `toggle-view`, `right-panel`, `toggle-sidebar`, `expand-window`,
 `widen-panel`, `narrow-panel`, `reset-panel-width`, `toolbar`, `properties`, `retry-renders`, `search`, `tags`,
 `files`, `back`, `forward`, `new-tab`, `close-tab`, `find`, `replace`, `undo-rename`, `add-vault`, `palette`,
-`cheatsheet`. Commands that need an open note do nothing without one.
+`cheatsheet` - these are also the command palette's entries. `save`, `next-tab`, `prev-tab` run too (the same
+dispatcher every remappable shortcut goes through, see [CONFIGURATION.md](CONFIGURATION.md#keyboard-shortcuts));
+they're not in the palette since "save now" and "cycle tabs" aren't things you'd search for by name. Commands that
+need an open note do nothing without one.
 
 ## `status`
 

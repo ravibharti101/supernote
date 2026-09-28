@@ -72,7 +72,17 @@ load: ..."* with the component error. A second common cause is a stale cache: re
 
 - **Add a palette command**: an entry in `js/commands.js` (id, group, title, keys, `needsNote`), a `case` in
   `runCommand` (`qml/ui/logic/SwitcherLayer.qml`), a test in `tests/commands.test.js` if it changes the list. It is
-  reachable through `dms ipc call supernote command <id>` automatically.
+  reachable through `dms ipc call supernote command <id>` automatically, and (since it has a `keys` default and
+  `handleKey` dispatches every `COMMANDS` id through `runCommand`) remappable from Settings automatically too.
+- **Add a remappable shortcut that isn't a palette command** (a formatting/editor/modal action): an entry in
+  `js/commands.js`'s `SHORTCUTS_ONLY` array (id, group, title, keys). Then wire the *matching*, not the key: at the
+  relevant call site (`PanelBase.qml handleKey`, `EditingLayer.qml editorKey`, `js/mdkeys.js shortcutName`,
+  `CaptureBox.qml`, `Switcher.qml`, `FileTree.qml`), build `Keymap.eventCombo({key, ctrl, shift, alt, meta})` and
+  check `Keymap.idFor(combo, core.keymap, [...your ids])` against your new id, rather than comparing `event.key`
+  directly - that's what makes it remappable and keeps `Ctrl+/` accurate for free. A `fmt-*` id must never require
+  `Alt` (`js/mdkeys.js handle()` never routes an Alt-held combo to formatting - it's reserved for panel/navigation
+  shortcuts one layer up); the settings UI already refuses to save one for that reason. Add coverage in
+  `tests/keymap.test.js` / `tests/mdkeys.test.js` / `tests/commands.test.js` as appropriate.
 - **Add an IPC verb**: a function in the `IpcHandler` in `SuperNote.qml` returning a string; document it in `docs/IPC.md`.
 - **Add a setting**: a `StringSetting` in `SuperNoteSettings.qml`; read it through `pluginData` (see `cfg` in
   `VaultLayer.qml` and `js/config.js`, which merges defaults < `.obsidian` < settings); document it in

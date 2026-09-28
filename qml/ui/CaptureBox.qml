@@ -7,6 +7,7 @@ import qs.Services
 import qs.Widgets
 import "../../js/mdkeys.js" as MdKeys
 import "../../js/markdown.js" as Md
+import "../../js/keymap.js" as Keymap
 
 // SuperNote quick capture: a small markdown box. Enter is a new line (lists continue like in the editor);
 // Ctrl+Enter appends to today's daily note, Ctrl+Shift+Enter saves an Inbox note, Esc cancels.
@@ -166,14 +167,19 @@ Item {
                         const ctrl = (event.modifiers & Qt.ControlModifier) !== 0;
                         const shift = (event.modifiers & Qt.ShiftModifier) !== 0;
                         const alt = (event.modifiers & Qt.AltModifier) !== 0;
+                        const combo = Keymap.eventCombo({ key: event.key, ctrl, shift, alt, meta: false });
+                        const id = combo ? Keymap.idFor(combo, box.core.keymap, ["capture-daily", "capture-note"]) : null;
                         if (event.key === Qt.Key_Escape) {
                             box.close();
                             event.accepted = true;
-                        } else if ((event.key === Qt.Key_Return || event.key === Qt.Key_Enter) && ctrl) {
-                            box.submit(shift);
+                        } else if (id === "capture-daily") {
+                            box.submit(false);
+                            event.accepted = true;
+                        } else if (id === "capture-note") {
+                            box.submit(true);
                             event.accepted = true;
                         } else if (!box.busy) {
-                            const ed = MdKeys.handle(field.text, field.selectionStart, field.selectionEnd, { key: event.key, ctrl: ctrl, shift: shift, alt: alt, text: event.text });
+                            const ed = MdKeys.handle(field.text, field.selectionStart, field.selectionEnd, { key: event.key, ctrl: ctrl, shift: shift, alt: alt, text: event.text }, box.core.keymap);
                             if (ed) {
                                 MdKeys.applyEdit(field, ed);
                                 event.accepted = true;

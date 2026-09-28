@@ -1,6 +1,7 @@
 import QtQuick
 import qs.Common
 import qs.Widgets
+import "../../../js/keymap.js" as Keymap
 
 // Quick switcher overlay: also the command palette, template picker and move-to-folder picker (ui.switcherMode).
 // Inputs: ui. Exposes the text field (`field`) so the panel can focus it.
@@ -34,7 +35,12 @@ Rectangle {
                 ui.switcherIndex = Math.max(ui.switcherIndex - 1, 0);
                 event.accepted = true;
             } else if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) {
-                ui.switcherAccept((event.modifiers & Qt.ControlModifier) !== 0);
+                const ctrl = (event.modifiers & Qt.ControlModifier) !== 0;
+                const shift = (event.modifiers & Qt.ShiftModifier) !== 0;
+                const alt = (event.modifiers & Qt.AltModifier) !== 0;
+                const combo = Keymap.eventCombo({ key: event.key, ctrl, shift, alt, meta: false });
+                const newTab = !!combo && Keymap.idFor(combo, ui.core.keymap, ["switcher-new-tab"]) === "switcher-new-tab";
+                ui.switcherAccept(newTab);
                 event.accepted = true;
             }
         }

@@ -45,7 +45,7 @@ SidebarLayer {
 
     readonly property var cheatRows: {
         const rows = [];
-        Commands.cheatSheet().forEach(g => {
+        Commands.cheatSheet(core.keymap).forEach(g => {
             rows.push({ header: g.group });
             g.items.forEach(i => rows.push(i));
         });
@@ -104,6 +104,9 @@ SidebarLayer {
         case "forward": core.goForward(); break;
         case "new-tab": core.newTab(); break;
         case "close-tab": core.closeTab(core.tabState.active); break;
+        case "next-tab": core.cycleTab(1); break;
+        case "prev-tab": core.cycleTab(-1); break;
+        case "save": core.saveNow(); break;
         case "find": openFind(false); break;
         case "replace": openFind(true); break;
         case "undo-rename": core.undoRename(); break;
@@ -152,7 +155,7 @@ SidebarLayer {
     function updateSwitcher() {
         const q = switcherField.text.trim();
         if (switcherMode === "commands") {
-            switcherResults = Commands.filter(q, !!core.noteRel).map(c => ({ kind: "command", item: { name: c.title, folder: c.keys, id: c.id }, positions: [] }));
+            switcherResults = Commands.filter(q, !!core.noteRel).map(c => ({ kind: "command", item: { name: c.title, folder: c.external ? c.keys : core.keymap[c.id], id: c.id }, positions: [] }));
             switcherIndex = 0;
             return;
         }

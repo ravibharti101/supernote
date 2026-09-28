@@ -1,6 +1,8 @@
 import QtQuick
 import Quickshell
 import qs.Modals.FileBrowser
+import "../../../js/commands.js" as Commands
+import "../../../js/keymap.js" as Keymap
 
 // Panel logic, part 1 of 7 (base): dialogs (`ask`), focus helpers, global key handling (`handleKey`), vault chooser.
 // The panel is a chain of QML types -- PanelBase -> EditingLayer -> FindLayer -> SidebarLayer -> SwitcherLayer ->
@@ -154,10 +156,15 @@ Item {
         return t ? t.split(/\s+/).length : 0;
     }
 
+    // Every js/commands.js palette-command id is reachable from a keypress here, unless it's `external`
+    // (a compositor-level bind SuperNote never gets an event for, e.g. quick capture).
+    readonly property var panelCommandIds: Commands.COMMANDS.filter(c => !c.external).map(c => c.id)
+
     function handleKey(event) {
         const ctrl = (event.modifiers & Qt.ControlModifier) !== 0;
         const shift = (event.modifiers & Qt.ShiftModifier) !== 0;
         const alt = (event.modifiers & Qt.AltModifier) !== 0;
+        const meta = (event.modifiers & Qt.MetaModifier) !== 0;
         if (event.key === Qt.Key_Escape) {
             if (cheatOpen) {
                 cheatOpen = false;
@@ -176,65 +183,25 @@ Item {
                 core.close();
             }
             event.accepted = true;
-        } else if (ctrl && !shift && event.key === Qt.Key_N) {
-            core.newNote();
-            event.accepted = true;
-        } else if (ctrl && !shift && event.key === Qt.Key_S) {
-            core.saveNow();
-            event.accepted = true;
-        } else if (event.key === Qt.Key_F2 && core.noteRel) {
-            focusTitle();
-            event.accepted = true;
-        } else if (ctrl && shift && event.key === Qt.Key_E) {
-            toggleTree();
-            event.accepted = true;
-        } else if (ctrl && !shift && event.key === Qt.Key_Backslash) {
-            core.toggleSidebar();
-            event.accepted = true;
-        } else if (ctrl && !shift && event.key === Qt.Key_O) {
-            openSwitcher();
-            event.accepted = true;
-        } else if (ctrl && !shift && event.key === Qt.Key_P) {
-            openPalette();
-            event.accepted = true;
-        } else if (ctrl && event.key === Qt.Key_Slash) {
-            cheatOpen = !cheatOpen;
-            event.accepted = true;
-        } else if (ctrl && !shift && event.key === Qt.Key_T) {
-            core.newTab();
-            event.accepted = true;
-        } else if (ctrl && !shift && event.key === Qt.Key_W) {
-            core.closeTab(core.tabState.active);
-            event.accepted = true;
-        } else if (ctrl && (event.key === Qt.Key_Tab || event.key === Qt.Key_Backtab || event.key === Qt.Key_PageDown || event.key === Qt.Key_PageUp)) {
-            core.cycleTab(event.key === Qt.Key_Backtab || event.key === Qt.Key_PageUp || shift ? -1 : 1);
-            event.accepted = true;
-        } else if ((event.modifiers & Qt.AltModifier) && event.key === Qt.Key_Left) {
-            core.goBack();
-            event.accepted = true;
-        } else if ((event.modifiers & Qt.AltModifier) && event.key === Qt.Key_Right) {
-            core.goForward();
-            event.accepted = true;
-        } else if (alt && !ctrl && !shift && (event.key === Qt.Key_Plus || event.key === Qt.Key_Equal) && !keys.inWindow) {
-            core.setDockWidth(core.dockWidth + core.dockWidthStep);
-            event.accepted = true;
-        } else if (alt && !ctrl && !shift && event.key === Qt.Key_Minus && !keys.inWindow) {
-            core.setDockWidth(core.dockWidth - core.dockWidthStep);
-            event.accepted = true;
-        } else if (ctrl && shift && event.key === Qt.Key_F) {
-            openSearch();
-            event.accepted = true;
-        } else if (ctrl && shift && event.key === Qt.Key_B) {
-            core.setRightPanel(!core.rightPanel);
-            event.accepted = true;
-        } else if (ctrl && !shift && event.key === Qt.Key_E && core.noteRel) {
-            core.cycleViewMode();
-            event.accepted = true;
-        } else if (ctrl && !shift && event.key === Qt.Key_F) {
-            openFind(false);
-            event.accepted = true;
-        } else if (ctrl && !shift && event.key === Qt.Key_H) {
-            openFind(true);
+            return;
+        }
+        const combo = Keymap.eventCombo({ key: event.key, ctrl, shift, alt, meta });
+        let id = combo ? Keymap.idFor(combo, core.keymap, panelCommandIds) : null;
+        // widen/narrow only mean anything for the docked panel; EditingLayer's own copy claims the event first
+        // when the editor has focus (Qt's TextEdit swallows Alt+key before this handler ever sees it there).
+        if ((id === "widen-panel" || id === "narrow-panel") && keys.inWindow)
+            id = null;
+        if (id) {
+            const cmd = Commands.COMMANDS.find(c => c.id === id);
+            if (!cmd.needsNote || core.noteRel) {
+                ui.runCommand(id);
+                event.accepted = true;
+                return;
+            }
+        }
+        // fixed, non-remappable secondary aliases for tab cycling (next-tab/prev-tab are Ctrl+Tab/Ctrl+Shift+Tab)
+        if (ctrl && (event.key === Qt.Key_PageDown || event.key === Qt.Key_PageUp)) {
+            core.cycleTab(event.key === Qt.Key_PageUp ? -1 : 1);
             event.accepted = true;
         } else if (core.viewMode === "preview" && core.noteRel && !ctrl) {
             const step = event.key === Qt.Key_Down ? 60 : (event.key === Qt.Key_Up ? -60 : (event.key === Qt.Key_PageDown ? previewFlick.height * 0.9 : (event.key === Qt.Key_PageUp ? -previewFlick.height * 0.9 : 0)));

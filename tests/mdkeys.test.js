@@ -1,20 +1,26 @@
 const assert = require("assert");
 const raw = require("./load")(__dirname + "/../js/mdkeys.js");
+const commands = require("./load")(__dirname + "/../js/commands.js");
 const j = x => (x === undefined || x === null ? x : JSON.parse(JSON.stringify(x)));
 const K = new Proxy({}, { get: (_, k) => (...a) => j(raw[k](...a)) });
 let passed = 0;
 function test(name, fn) { try { fn(); passed++; } catch (e) { console.error("FAIL: " + name + "\n  " + e.message.split("\n").join("\n  ")); process.exitCode = 1; } }
 
+// The default keymap (js/commands.js's own fmt-* defaults) - handle()'s ctrl-shortcut branch needs a resolved
+// keymap to look the pressed combo up against; these tests exercise the defaults, not a remap.
+const DEFAULT_KEYMAP = {};
+commands.allShortcuts().forEach(c => { DEFAULT_KEYMAP[c.id] = c.keys; });
+
 // Qt key codes
 const Key = { Return: 0x01000004, Enter: 0x01000005, Tab: 0x01000001, Backtab: 0x01000002, B: 0x42, I: 0x49, K: 0x4B, L: 0x4C, X: 0x58, C: 0x43, V: 0x56, N1: 0x31, N0: 0x30, BracketRight: 0x5D, BracketLeft: 0x5B, A: 0x41 };
 const ev = (key, o) => Object.assign({ key, ctrl: false, shift: false, alt: false, text: "" }, o || {});
 // run handle on "abc|def" style text ('|' caret, '«' '»' selection) and return the resulting text with markers
-function run(marked, e) {
+function run(marked, e, keymap) {
   let s, en, text;
   const a = marked.indexOf("«");
   if (a >= 0) { text = marked.replace("«", "").replace("»", ""); s = a; en = marked.indexOf("»") - 1; }
   else { s = en = marked.indexOf("|"); text = marked.replace("|", ""); }
-  const ed = K.handle(text, s, en, e);
+  const ed = K.handle(text, s, en, e, keymap || DEFAULT_KEYMAP);
   if (!ed) return null;
   const out = text.slice(0, ed.start) + ed.text + text.slice(ed.end);
   return ed.selStart === ed.selEnd ? out.slice(0, ed.selStart) + "|" + out.slice(ed.selStart) : out.slice(0, ed.selStart) + "«" + out.slice(ed.selStart, ed.selEnd) + "»" + out.slice(ed.selEnd);
@@ -64,6 +70,25 @@ test("typing an opener auto-pairs, a closer skips over", () => {
 });
 test("[[ pairs to [[]]", () => assert.strictEqual(run("[|]", ev(0x5B, { text: "[" })), "[[|]]"));
 test("ordinary characters are left to the editor", () => assert.strictEqual(run("a|", ev(0x62, { text: "b" })), null));
+test("remapping fmt-bold changes which combo triggers it", () => {
+  const remapped = Object.assign({}, DEFAULT_KEYMAP, { "fmt-bold": "Ctrl+Shift+B" });
+  assert.strictEqual(run("«word»", ev(Key.B, { ctrl: true }), remapped), null, "the old default no longer works");
+  assert.strictEqual(run("«word»", ev(Key.B, { ctrl: true, shift: true }), remapped), "**«word»**");
+});
+// handle() never routes an Alt-held combo to formatting at all (ev.alt short-circuits to null below, before
+// shortcutName/format ever run) - Alt is reserved one layer up for panel/navigation shortcuts. A remap to an
+// Alt combo would be a dead binding; the settings UI must refuse Alt for any fmt-* id for exactly this reason.
+test("a fmt-* id can never fire on an Alt-held combo, remapped or not", () => {
+  const remapped = Object.assign({}, DEFAULT_KEYMAP, { "fmt-bold": "Ctrl+Alt+B" });
+  assert.strictEqual(run("«word»", ev(Key.B, { ctrl: true, alt: true }), remapped), null);
+});
+test("unbinding a shortcut (empty combo) leaves the key alone", () => {
+  const unbound = Object.assign({}, DEFAULT_KEYMAP, { "fmt-bold": "" });
+  assert.strictEqual(run("«word»", ev(Key.B, { ctrl: true }), unbound), null);
+});
+test("without a keymap, ctrl-shortcuts are left to the editor (no crash)", () => {
+  assert.strictEqual(run("«word»", ev(Key.B, { ctrl: true }), {}), null);
+});
 test("format(): named commands used by the toolbar", () => {
   assert.strictEqual(K.format("bold", "x", 0, 1).text, "**x**");
   assert.strictEqual(K.format("nope", "x", 0, 1), null);

@@ -1,10 +1,16 @@
 .pragma library
 .import "markdown.js" as Md
+.import "keymap.js" as Keymap
 
 // Markdown editing keys shared by the main editor and the quick-capture box (pure; tests/mdkeys.test.js).
 // `ev` = {key, ctrl, shift, alt, text} with Qt key codes; results are edits {start, end, text, selStart, selEnd}.
+// `keymap` (in `handle`) is a js/keymap.js resolve()d map, from js/commands.js's remappable `fmt-*` ids.
 
-var KEY = { Return: 0x01000004, Enter: 0x01000005, Tab: 0x01000001, Backtab: 0x01000002, B: 0x42, I: 0x49, K: 0x4B, L: 0x4C, X: 0x58, C: 0x43, N0: 0x30, N1: 0x31, N6: 0x36, BracketLeft: 0x5B, BracketRight: 0x5D };
+var KEY = { Return: 0x01000004, Enter: 0x01000005, Tab: 0x01000001, Backtab: 0x01000002 };
+
+// js/commands.js's ids for these shortcuts are "fmt-" + this function's own action name (bold, h0, indent, ...),
+// so recovering the action from a matched id is just dropping the prefix - no separate id->name table needed.
+var FORMAT_IDS = ["fmt-bold", "fmt-italic", "fmt-strike", "fmt-code", "fmt-link", "fmt-task", "fmt-h0", "fmt-h1", "fmt-h2", "fmt-h3", "fmt-h4", "fmt-h5", "fmt-h6", "fmt-indent", "fmt-outdent"];
 
 // Named formatting command (toolbar buttons, shortcuts, palette) -> edit or null.
 function format(name, t, s, e) {
@@ -25,28 +31,17 @@ function format(name, t, s, e) {
     return null;
 }
 
-function shortcutName(ev) {
-    var k = ev.key;
-    if (!ev.shift) {
-        if (k === KEY.B) return "bold";
-        if (k === KEY.I) return "italic";
-        if (k === KEY.K) return "link";
-        if (k === KEY.L) return "task";
-        if (k === KEY.BracketRight) return "indent";
-        if (k === KEY.BracketLeft) return "outdent";
-        if (k >= KEY.N1 && k <= KEY.N6) return "h" + (k - KEY.N0);
-        if (k === KEY.N0) return "h0";
-    } else {
-        if (k === KEY.X) return "strike";
-        if (k === KEY.C) return "code";
-    }
-    return "";
+function shortcutName(ev, keymap) {
+    var combo = Keymap.eventCombo({ key: ev.key, ctrl: ev.ctrl, shift: ev.shift, alt: ev.alt, meta: false });
+    var id = combo ? Keymap.idFor(combo, keymap, FORMAT_IDS) : null;
+    return id ? id.slice(4) : "";
 }
 
-// The edit for a key press, or null when the editor should do its normal thing.
-function handle(text, s, e, ev) {
+// The edit for a key press, or null when the editor should do its normal thing. `keymap` is only needed for the
+// ctrl-shortcut branch below; plain Enter/Tab/auto-pair (not remappable) don't consult it.
+function handle(text, s, e, ev, keymap) {
     if (ev.ctrl && !ev.alt)
-        return format(shortcutName(ev), text, s, e);
+        return format(shortcutName(ev, keymap), text, s, e);
     if (ev.alt || ev.ctrl)
         return null;
     if (ev.key === KEY.Return || ev.key === KEY.Enter) {

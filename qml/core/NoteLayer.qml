@@ -1,6 +1,8 @@
 import QtQuick
 import "../../js/tree.js" as Tree
 import "../../js/markdown.js" as Md
+import "../../js/commands.js" as Commands
+import "../../js/keymap.js" as Keymap
 
 // The open note: buffer, dirty/conflict state, autosave (1 s), save/flush with mtime conflict detection,
 // external-change check, view mode and per-note UI toggles. Everything that replaces the buffer goes through
@@ -30,6 +32,9 @@ VaultLayer {
     property string viewMode: "edit"
     // formatting toolbar visibility: a plugin setting (DMS Settings), also toggled from the palette / status bar
     readonly property bool showToolbar: (pluginData || {}).showToolbar !== false
+    // resolved keyboard shortcuts: a plugin setting (sparse {id: "combo"} overrides over js/commands.js's
+    // defaults), reactive the same way - a shortcut saved from Settings takes effect on the running plugin live.
+    readonly property var keymap: Keymap.resolve(Commands.allShortcuts(), (pluginData || {}).keymap || {})
     property int editorSetSerial: 0
     readonly property string noteTitle: noteRel ? Tree.baseName(noteRel) : ""
 

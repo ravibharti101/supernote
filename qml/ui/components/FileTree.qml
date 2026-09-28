@@ -1,6 +1,7 @@
 import QtQuick
 import qs.Common
 import qs.Widgets
+import "../../../js/keymap.js" as Keymap
 
 // File tree ListView: pinned/recent sections and the folder tree (ui.core.sideList). Keyboard: arrows, Enter, F2, Delete.
 // Inputs: ui. The host anchors it below the sidebar tabs. Exposes the list view (`list`) for focusing.
@@ -24,6 +25,13 @@ ListView {
 
     Keys.onPressed: event => {
         const row = ui.core.sideList[tree.currentIndex];
+        // "delete"/"rename" are the same remappable ids as the open-note versions of these actions (PanelBase.qml)
+        // - one binding, even though this row-scoped copy acts on the tree selection rather than the open note.
+        const ctrl = (event.modifiers & Qt.ControlModifier) !== 0;
+        const shift = (event.modifiers & Qt.ShiftModifier) !== 0;
+        const alt = (event.modifiers & Qt.AltModifier) !== 0;
+        const combo = Keymap.eventCombo({ key: event.key, ctrl, shift, alt, meta: false });
+        const id = combo ? Keymap.idFor(combo, ui.core.keymap, ["delete", "rename"]) : null;
         if (event.key === Qt.Key_Down) {
             tree.currentIndex = Math.min(tree.currentIndex + 1, ui.core.sideList.length - 1);
         } else if (event.key === Qt.Key_Up) {
@@ -34,9 +42,9 @@ ListView {
             ui.core.toggleDir(row.path);
         } else if (row && event.key === Qt.Key_Left && row.type === "dir" && row.expanded) {
             ui.core.toggleDir(row.path);
-        } else if (row && row.type !== "hdr" && event.key === Qt.Key_Delete) {
+        } else if (row && row.type !== "hdr" && id === "delete") {
             ui.askDelete(row.path, row.type);
-        } else if (row && row.type !== "hdr" && row.type !== "pin" && row.type !== "recent" && event.key === Qt.Key_F2) {
+        } else if (row && row.type !== "hdr" && row.type !== "pin" && row.type !== "recent" && id === "rename") {
             ui.askRename(row.path, row.type);
         } else if (event.key === Qt.Key_Escape) {
             ui.focusEditor();

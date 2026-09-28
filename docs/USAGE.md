@@ -1,7 +1,8 @@
 # Using SuperNote
 
-Shortcuts are hard-coded to Obsidian's defaults where Obsidian has one. `Ctrl+/` (or the palette entry *Keyboard
-shortcuts*) shows the live list.
+Shortcuts default to Obsidian's own where Obsidian has one, and are remappable from DMS Settings → Plugins →
+SuperNote → *Keyboard shortcuts* (see [CONFIGURATION.md](CONFIGURATION.md)). `Ctrl+/` (or the palette entry
+*Keyboard shortcuts*) always shows the shortcuts actually in effect, defaults or not.
 
 ## The panel
 

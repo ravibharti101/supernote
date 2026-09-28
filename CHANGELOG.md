@@ -9,6 +9,13 @@
   window is resized by the compositor as usual). Commands `widen-panel` / `narrow-panel` / `reset-panel-width`.
 - **Follow wikilinks from the quick-capture box**: `Ctrl+click` a `[[link]]` in the draft opens (or creates) it in
   the main panel, which is shown if it was closed; the capture box itself stays open with the draft intact.
+- **Remappable keyboard shortcuts.** DMS Settings → Plugins → SuperNote → *Keyboard shortcuts*: click a shortcut,
+  press a new key combination (`Esc` cancels), reset one row or all of them. Covers palette commands, formatting
+  (bold/italic/headings/indent/...), save, tab cycling, rename/delete, and the quick-capture box's and quick
+  switcher's own `Ctrl+Enter`-family shortcuts - everything except structural UI keys (`Escape`, list navigation,
+  `Tab`/`Enter`-to-confirm) and the compositor-level `Super+Shift+N`/`Super+Ctrl+N` binds. `Ctrl+/` always reflects
+  the shortcuts actually in effect. New `js/keymap.js`; `js/commands.js`'s `keys` field is now the live source of
+  truth for every in-app shortcut instead of display text a hand-written key check could drift out of sync with.
 
 ### Fixed
 - The entry file's panel `Loader` shared the id `ui` with the panel's own logic-chain object (every component's

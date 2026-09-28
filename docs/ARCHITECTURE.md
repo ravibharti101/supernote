@@ -102,6 +102,7 @@ into each other: they talk through `ui` (state and actions) and the controller (
 |---|---|
 | `markdown.js` | edit transforms, frontmatter, headings / tags / links, find / replace, wikilink helpers, preview preprocessing (`renderPreview`), the syntax-highlight lexer |
 | `mdkeys.js` | key → edit mapping shared by the editor and the capture box |
+| `keymap.js` | keypress ↔ `"Ctrl+Shift+X"` string, and resolving `commands.js` defaults against a user's overrides |
 | `previewhtml.js` (+ generated `mdit.js`) | markdown → Qt rich-text HTML (markdown-it) |
 | `tree.js` | tree rows, path helpers (`remapPath`, ...), pinned / recent sections |
 | `tabs.js` | tab and history model |

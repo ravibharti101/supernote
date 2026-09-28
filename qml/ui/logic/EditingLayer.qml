@@ -2,6 +2,7 @@ import QtQuick
 import qs.Common
 import "../../../js/markdown.js" as Md
 import "../../../js/mdkeys.js" as MdKeys
+import "../../../js/keymap.js" as Keymap
 
 // Panel logic, part 2: editing helpers (formatting, edits, paste, editor keys), syntax-highlight state, cursor info.
 PanelBase {
@@ -108,6 +109,8 @@ PanelBase {
         return true;
     }
 
+    readonly property var editorLocalIds: ["follow-link", "paste-image", "widen-panel", "narrow-panel"]
+
     function editorKey(event) {
         if (acOpen) {
             if (event.key === Qt.Key_Down || event.key === Qt.Key_Up) {
@@ -129,29 +132,31 @@ PanelBase {
         const ctrl = (event.modifiers & Qt.ControlModifier) !== 0;
         const shift = (event.modifiers & Qt.ShiftModifier) !== 0;
         const alt = (event.modifiers & Qt.AltModifier) !== 0;
-        if (ctrl && !alt && !shift && (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) && followLinkAt(editor.cursorPosition)) {
+        const combo = Keymap.eventCombo({ key: event.key, ctrl, shift, alt, meta: false });
+        const id = combo ? Keymap.idFor(combo, core.keymap, editorLocalIds) : null;
+        if (id === "follow-link" && followLinkAt(editor.cursorPosition)) {
             event.accepted = true;
             return;
         }
-        if (ctrl && !alt && !shift && event.key === Qt.Key_V) {
+        if (id === "paste-image") {
             pasteFromClipboard();
             event.accepted = true;
             return;
         }
         // Alt+<printable key> would otherwise insert the character: Qt's TextEdit only blocks its own default
-        // text-input handling for Ctrl (word-nav etc.), not for a lone Alt, so the panel-level Alt++/Alt+- resize
+        // text-input handling for Ctrl (word-nav etc.), not for a lone Alt, so the panel-level widen/narrow-panel
         // shortcut (PanelBase.handleKey) never even sees the event while the editor has focus - claim it here first.
-        if (alt && !ctrl && !shift && !keys.inWindow && (event.key === Qt.Key_Plus || event.key === Qt.Key_Equal)) {
+        if (id === "widen-panel" && !keys.inWindow) {
             core.setDockWidth(core.dockWidth + core.dockWidthStep);
             event.accepted = true;
             return;
         }
-        if (alt && !ctrl && !shift && !keys.inWindow && event.key === Qt.Key_Minus) {
+        if (id === "narrow-panel" && !keys.inWindow) {
             core.setDockWidth(core.dockWidth - core.dockWidthStep);
             event.accepted = true;
             return;
         }
-        const ed = MdKeys.handle(editor.text, editor.selectionStart, editor.selectionEnd, { key: event.key, ctrl: ctrl, shift: shift, alt: alt, text: event.text });
+        const ed = MdKeys.handle(editor.text, editor.selectionStart, editor.selectionEnd, { key: event.key, ctrl: ctrl, shift: shift, alt: alt, text: event.text }, core.keymap);
         if (ed) {
             applyEdit(ed);
             event.accepted = true;

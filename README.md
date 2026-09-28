@@ -27,21 +27,41 @@ editor can open the same folder.
   notes, templates with variables, paste images from the clipboard, frontmatter properties editor.
 - **Scriptable** through `dms ipc call supernote ...` ([docs/IPC.md](docs/IPC.md)).
 
-## Requirements
-
-| | Needed for |
-|---|---|
-| DankMaterialShell / Quickshell 0.3+ (Qt 6.10) | everything (the plugin runs inside DMS) |
-| `bash`, `rg` (ripgrep), `jq`, `gio` (glib) | vault operations, search, trash (required) |
-| `wl-clipboard` (`wl-paste`) | paste images, `supernote clip` |
-| `typst` (needs network once for the `mitex` package) | LaTeX math in the preview |
-| `mmdr` on `PATH`, or network once to fetch a pinned release | Mermaid diagrams |
-| `magick` (ImageMagick) | measuring rendered pictures, pasting non-PNG images |
-| Node 18+ | running the unit tests only |
-
-Math and Mermaid are optional: without their tools the source stays visible as text / a code block.
-
 ## Install
+
+### 1. Install the required tools
+
+DMS/Quickshell itself has its own [install guide](https://github.com/AvengeMedia/DankMaterialShell) - do that first.
+Math and Mermaid are optional: without their tools the source just stays visible as text / a code block instead of
+a picture. Everything else below is required for basic vault operations (file listing, search, trash).
+
+| Tool | Needed for | Debian / Ubuntu | Arch | Fedora |
+|---|---|---|---|---|
+| `rg`, `jq`, `gio` (glib) | vault operations, search, trash | `sudo apt install ripgrep jq libglib2.0-bin` | `sudo pacman -S ripgrep jq glib2` | `sudo dnf install ripgrep jq glib2` |
+| `wl-clipboard` (`wl-paste`) | paste images, `supernote clip` | `sudo apt install wl-clipboard` | `sudo pacman -S wl-clipboard` | `sudo dnf install wl-clipboard` |
+| ImageMagick (`magick`) | measuring rendered pictures, pasting non-PNG images | `sudo apt install imagemagick` | `sudo pacman -S imagemagick` | `sudo dnf install ImageMagick` |
+
+- **`typst`** (LaTeX math): `sudo snap install typst`, or `cargo install typst-cli`, or your distro's package if it
+  has one. The first time you actually render a formula, `scripts/supernote-render.sh` fetches the `mitex` package
+  over the network once (then it's cached and works offline).
+- **`mmdr`** (Mermaid diagrams): nothing to do - the first time you render a diagram,
+  `scripts/supernote-render.sh` downloads a pinned, SHA-256-verified release into
+  `~/.cache/supernote/render/bin/` automatically (network needed once, then offline). If you'd rather manage it
+  yourself (or have no network access from this machine at all), put it on `PATH` instead:
+  `cargo install mermaid-rs-renderer`.
+- **Node 18+** (only to run `make test`, not needed to use the plugin): your distro's package, or
+  [nodejs.org](https://nodejs.org), or `nvm install 22`.
+
+Check what's actually on `PATH` at any point with:
+
+```sh
+command -v rg jq gio wl-paste magick typst mmdr node
+```
+
+### 2. Install the plugin (manual)
+
+SuperNote isn't published to the [official DMS plugin registry](https://github.com/AvengeMedia/dms-plugin-registry),
+so cloning it and symlinking it into DMS's plugin folder yourself is the only way to install it right now:
 
 ```sh
 git clone <this repository> ~/Projects/DMS/plugins/supernote
@@ -56,6 +76,9 @@ Enable **SuperNote** in DMS Settings → Plugins, then bind keys (niri shown; th
 Mod+Shift+N { spawn "dms" "ipc" "call" "supernote" "toggle"; }
 Mod+Ctrl+N  { spawn "dms" "ipc" "call" "supernote" "quick"; }
 ```
+
+Updating later is a `git pull` in the cloned checkout plus `dms restart` - the symlink means DMS always sees the
+current checkout, there's nothing to re-copy.
 
 ## Quick start
 

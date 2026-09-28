@@ -51,7 +51,10 @@ flowchart LR
   without a restart); the palette entry *Retry failed math / diagram renders* (`retry-renders`) retries at once.
 - **While rendering (and when it failed)** inline math shows its source as a code chip and `$$` blocks as a code
   block, so nothing is hidden; the picture replaces it when ready.
-- **Quotes and callouts**: a `mermaid` fence inside a `>` blockquote or callout is rendered too.
+- **Quotes and callouts**: a `mermaid` fence inside a `>` blockquote or callout is rendered too. A fence inside a
+  plain list item is not: Qt's rich-text preview renders an `<img>` inside a `<li>` by detaching the bullet from
+  its text (confirmed with several list shapes; not something fixable from the generated markdown). The fence is
+  left as a code block there instead of shipping a broken layout.
 - **Cache**: keyed by content and theme, so a theme change re-renders. Files older than 45 days are pruned at start-up
   and at most 800 are kept.
 

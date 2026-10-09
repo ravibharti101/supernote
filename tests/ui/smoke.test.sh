@@ -105,6 +105,15 @@ ipc viewMode edit >/dev/null
 wait_for "edit hides the preview" '.panel.editorVisible and (.panel.previewVisible | not)' 5
 ipc viewMode bogus >/dev/null
 check "an invalid view mode is ignored" edit "$(field .viewMode)"
+ipc command toggle-preview >/dev/null
+wait_for "toggle-preview goes from edit to preview" '.viewMode == "preview"' 5
+ipc command toggle-preview >/dev/null
+wait_for "toggle-preview goes back to edit" '.viewMode == "edit"' 5
+ipc viewMode split >/dev/null
+ipc command toggle-preview >/dev/null
+wait_for "toggle-preview goes from split to preview" '.viewMode == "preview"' 5
+ipc command toggle-preview >/dev/null
+wait_for "toggle-preview never lands on split" '.viewMode == "edit"' 5
 
 # ---- left panel, tabs, right panel, commands ---------------------------------------------------------------------
 ipc sidebar >/dev/null
@@ -157,6 +166,10 @@ ipc expand >/dev/null
 wait_for "expand makes a real window" '.window == "window" and .panel.mode == "window" and .panel.visible and .panel.width > 700' 10
 ipc dock >/dev/null
 wait_for "dock returns to the right side" ".window == \"dock\" and .panel.width == $W0 and .panel.visible" 10
+ipc command expand-window >/dev/null
+wait_for "the expand-window command expands a docked panel" '.window == "window" and .panel.mode == "window"' 10
+ipc command expand-window >/dev/null
+wait_for "the expand-window command docks a window again" ".window == \"dock\" and .panel.width == $W0 and .panel.visible" 10
 
 # ---- notes, capture, daily --------------------------------------------------------------------------------------------
 ipc capture "ui smoke capture" >/dev/null

@@ -89,6 +89,8 @@ current checkout, there's nothing to re-copy.
 | `Ctrl+O` / `Ctrl+P` | open a note / command palette |
 | `Ctrl+N` / `F2` | new note / rename (edit the title) |
 | `Ctrl+E` | cycle Edit → Split → Preview |
+| `Ctrl+Shift+V` | toggle Edit ↔ Preview |
+| `Alt+F` | expand to a window / dock back |
 | `Ctrl+\` | show / hide the left panel (files, search, tags) |
 | `Ctrl+Shift+F` | search all notes |
 | `Ctrl+/` | every shortcut |

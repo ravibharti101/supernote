@@ -109,7 +109,7 @@ PanelBase {
         return true;
     }
 
-    readonly property var editorLocalIds: ["follow-link", "paste-image", "widen-panel", "narrow-panel"]
+    readonly property var editorLocalIds: ["follow-link", "paste-image", "widen-panel", "narrow-panel", "expand-window"]
 
     function editorKey(event) {
         if (acOpen) {
@@ -153,6 +153,12 @@ PanelBase {
         }
         if (id === "narrow-panel" && !keys.inWindow) {
             core.setDockWidth(core.dockWidth - core.dockWidthStep);
+            event.accepted = true;
+            return;
+        }
+        // same reason: expand-window defaults to Alt+F, which would type an "f" here
+        if (id === "expand-window") {
+            ui.runCommand(id);
             event.accepted = true;
             return;
         }

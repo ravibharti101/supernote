@@ -12,9 +12,9 @@ the choice is remembered. Anything that lives in the left panel (`Ctrl+Shift+F`,
 shows it for you. `Esc` (with nothing else open) or a click outside closes the panel; the note, tabs and scroll
 position are kept.
 
-The header's *expand* button (also `dms ipc call supernote expand` and the palette) moves the same panel into a **real
-window** that your compositor tiles, moves and resizes, with the left panel shown. The same button docks it back. The
-panel always reopens docked.
+The header's *expand* button (also `Alt+F`, `dms ipc call supernote expand` and the palette) moves the same panel
+into a **real window** that your compositor tiles, moves and resizes, with the left panel shown. The same button
+docks it back. The panel always reopens docked.
 
 **Resizing the docked panel**: drag its left edge (the cursor turns into a resize handle), or `Alt++` / `Alt+-`
 (`Alt+=` works the same as `Alt++`) to grow or shrink it by a step. Double-click the handle, or the palette's
@@ -60,7 +60,7 @@ instead of overwriting either side.
 
 ## Writing
 
-- `Ctrl+E` cycles **Edit → Split → Preview**. The formatting toolbar can be hidden from the palette.
+- `Ctrl+E` cycles **Edit → Split → Preview**; `Ctrl+Shift+V` flips straight between Edit and Preview. The formatting toolbar can be hidden from the palette.
 - Shortcuts: `Ctrl+B` bold, `Ctrl+I` italic, `Ctrl+Shift+X` strikethrough, `Ctrl+Shift+C` inline code, `Ctrl+K` link,
   `Ctrl+L` toggle task, `Ctrl+1`…`6` heading level (`Ctrl+0` clears), `Tab` / `Shift+Tab` or `Ctrl+]` / `Ctrl+[`
   indent / outdent, `Ctrl+S` save now.

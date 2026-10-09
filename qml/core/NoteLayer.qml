@@ -49,6 +49,10 @@ VaultLayer {
         setViewMode(viewMode === "edit" ? "split" : (viewMode === "split" ? "preview" : "edit"));
     }
 
+    function togglePreview() {
+        setViewMode(viewMode === "preview" ? "edit" : "preview");
+    }
+
     property bool propsOpen: false
 
     function toggleProps() {

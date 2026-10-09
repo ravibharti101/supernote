@@ -88,6 +88,7 @@ SidebarLayer {
         case "pin": core.togglePin(core.noteRel); break;
         case "delete": askDelete(core.noteRel, "file"); break;
         case "toggle-view": core.cycleViewMode(); break;
+        case "toggle-preview": core.togglePreview(); break;
         case "right-panel": core.setRightPanel(!core.rightPanel); break;
         case "toolbar": core.toggleToolbar(); break;
         case "retry-renders": core.render.retryFailed(); break;

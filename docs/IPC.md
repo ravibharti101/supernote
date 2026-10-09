@@ -30,7 +30,7 @@ to call right after start-up. The panel opens on the focused screen.
 | `status` | – | JSON snapshot for scripts and tests |
 
 `command` ids (see `js/commands.js`): `new-note`, `new-from-template`, `insert-template`, `daily`, `capture`,
-`switcher`, `rename`, `pin`, `delete`, `toggle-view`, `right-panel`, `toggle-sidebar`, `expand-window`,
+`switcher`, `rename`, `pin`, `delete`, `toggle-view`, `toggle-preview`, `right-panel`, `toggle-sidebar`, `expand-window`,
 `widen-panel`, `narrow-panel`, `reset-panel-width`, `toolbar`, `properties`, `retry-renders`, `search`, `tags`,
 `files`, `back`, `forward`, `new-tab`, `close-tab`, `find`, `replace`, `undo-rename`, `add-vault`, `palette`,
 `cheatsheet` - these are also the command palette's entries. `save`, `next-tab`, `prev-tab` run too (the same

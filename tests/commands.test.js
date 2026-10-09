@@ -31,6 +31,16 @@ test("commands needing an open note are hidden without one", () => {
   assert.ok(!without.includes("toggle-view") && without.includes("new-note"));
   assert.ok(K.filter("", true).map(c => c.id).includes("toggle-view"));
 });
+test("window toggle and edit/preview toggle have default keys", () => {
+  assert.strictEqual(K.COMMANDS.find(c => c.id === "expand-window").keys, "Alt+F");
+  const tp = K.COMMANDS.find(c => c.id === "toggle-preview");
+  assert.strictEqual(tp.keys, "Ctrl+Shift+V");
+  assert.strictEqual(tp.needsNote, true);
+});
+test("no two palette commands share a default shortcut (they all go through one dispatcher)", () => {
+  const keys = K.COMMANDS.map(c => c.keys).filter(Boolean);
+  assert.strictEqual(new Set(keys).size, keys.length);
+});
 test("cheat sheet groups every shortcut once, using each entry's own default with no keymap given", () => {
   const groups = K.cheatSheet();
   assert.ok(groups.length >= 4);
